@@ -56,4 +56,14 @@ public class BoardServiceImpl implements BoardService{
 		bDao.deleteBoard(board_num);
 	}
 
+	@Override
+	public List<Board> searchList(String keyword) {
+		return bDao.searchList(keyword);
+	}
+
+	@Override
+	public List<Board> selectList(int startPage, int limit) {
+		return bDao.selectList(startPage, limit);
+	}
+
 }

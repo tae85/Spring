@@ -21,6 +21,9 @@ public class BoardDao {
 	public List<Board> selectList(){
 		return sqlSession.selectList("Board.selectList");
 	}
+	public List<Board> selectList(int startPage, int limit){
+		return sqlSession.selectList("Board.selectList");
+	}
 	
 	public int insertBoard(Board b) {
 		return sqlSession.insert("Board.insertBoard", b);
@@ -40,6 +43,10 @@ public class BoardDao {
 	
 	public int deleteBoard(String board_num){
 		return sqlSession.delete("Board.deleteBoard", board_num);
+	}
+
+	public List<Board> searchList(String keyword){
+		return sqlSession.selectList("Board.searchList", keyword);
 	}
 
 

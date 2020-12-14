@@ -5,8 +5,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<%-- <script src="${pageContext.request.contextPath}/resources/js/jquery-3.5.1.min.js"></script> --%>
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="${pageContext.request.contextPath}/resources/js/jquery-3.5.1.js"></script>
+<!-- <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> -->
 <title>게시글 수정</title>
 </head>
 <body>
@@ -60,12 +60,13 @@
 </body>
 <script type="text/javascript">
 	$(function(){
+		console.log("펑션");
 		$('form[name=renewFrom]').on('submit', function(event){
 			if($('input[name=board_pwd]').val() != "${board.board_pwd}"){
 				alert("비밀번호가 일치하지 않습니다.");
 				event.preventDefault();
 			} else {
-				retrun true;
+				return true;
 			}
 		});
 	});

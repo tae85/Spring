@@ -47,4 +47,11 @@
 	<delete id="deleteBoard" parameterType="string" flushCache="true" statementType="PREPARED">
 		delete from board where board_num=#{board_num}
 	</delete>
+	
+	<select id="searchList" parameterType="arraylist" resultMap="resultBoard">
+		select * from board 
+		where board_title like '%'||#{keyword}||'%'
+			or board_content like '%'||#{keyword}||'%'
+		order by regdate desc
+	</select>
 </mapper>

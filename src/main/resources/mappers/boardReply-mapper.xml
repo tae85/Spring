@@ -1,5 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="BoardReply">
-
+	<resultMap type="BoardReply" id="resultBoardReply">
+		<id property="comment_id" column="comment_id"/>
+		<result property="board_num" column="board_num"/>
+		<result property="comment_name" column="comment_name"/>
+		<result property="comment_pwd" column="comment_pwd"/>
+		<result property="comments" column="comments"/>
+		<result property="regdate" column="regdate"/>
+	</resultMap>
+	
+	<select id="selectBoardReplyAll" parameterType="string" resultType="arraylist" resultMap="resultBoardReply">
+		select * from board_comment where board_num=#{board_num}
+	</select>
+	
+	<select id="selectBoardReply" parameterType="string" resultType="BoardReply" resultMap="resultBoardReply">
+		select * from board_comment where comment_id=#{comment_id}
+	</select>
+	
+	<insert id="insertBoardReply" parameterType="BoardReply" flushCache="true" statementType="PREPARED" timeout="20">
+		insert into board_comment values(
+			 'BR'||TO_CHAR(SYSDATE,'RRMMDD')||LPAD(BOARD_COMMENT_SEQ.NEXTVAL,2,'0'), 
+			 #{board_num}, #{comment_name}, #{comment_pwd}, #{comments}, sysdate)
+	</insert>
+	
+	<update id="updateBoardReply" parameterType="BoardReply" flushCache="true" statementType="PREPARED" timeout="20">
+		update board_comment set comments=#{comments}
+		where comment_id =#{comment_id}
+		and comment_pwd=#{comment_pwd}
+	</update>
+	
+	<delete id="deleteBoardReply" parameterType="BoardReply" flushCache="true" statementType="PREPARED" timeout="20">
+		delete from board_comment 
+		where comment_id=#{comment_id}
+		and comment_pwd=#{comment_pwd}
+	</delete>
+	
 </mapper>

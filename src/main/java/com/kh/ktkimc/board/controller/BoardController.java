@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.kh.ktkimc.board.model.domain.Board;
+import com.kh.ktkimc.board.model.service.BoardReplyService;
 import com.kh.ktkimc.board.model.service.BoardService;
 
 @Controller
@@ -24,6 +25,11 @@ public class BoardController {
 
 	@Autowired
 	private BoardService bService;
+	
+	@Autowired
+	private BoardReplyService brService;
+	
+	public static final int LIMIT=10;
 	
 	@RequestMapping(value="/writeForm.do", method = RequestMethod.GET)
 	public String boardInsertForm(ModelAndView mv) {
@@ -43,7 +49,7 @@ public class BoardController {
 		return mv;
 	}
 	
-	@RequestMapping(value="/bList.do")
+	@RequestMapping(value="/bList.do", method = RequestMethod.GET)
 	public ModelAndView boardListService(ModelAndView mv) {
 		mv.addObject("list", bService.selectList());
 		mv.setViewName("board/bList");
@@ -81,10 +87,10 @@ public class BoardController {
 		String savePath = root + "\\uploadFiles";
 		String filePath = savePath+"\\" + board_file;
 		try {
+			System.out.println(board_file + "을 삭제합니다.");
+			System.out.println("기존 저장 경로 : " + savePath);
 			File delFile = new File(filePath);
 			delFile.delete();
-			System.out.println(board_file + "을 삭제합니다.");
-			System.out.println("기존 저장 경로");
 		} catch(Exception e) {
 			System.out.println("파일 삭제 에러 : " + e.getMessage());
 		}
@@ -108,7 +114,7 @@ public class BoardController {
 	@RequestMapping(value="/bUpdate.do", method = RequestMethod.POST)
 	public ModelAndView boardUpdate(Board b, @RequestParam(name="upfile") MultipartFile report, HttpServletRequest request, ModelAndView mv) {
 		
-		if(report!=null && !report.equals("")) {
+		if(report!=null || !report.equals("")) {
 			removeFile(b.getBoard_file(), request);
 			saveFile(report, request);
 			b.setBoard_file(report.getOriginalFilename());
@@ -123,6 +129,21 @@ public class BoardController {
 		return mv;
 	}
 	
+	@RequestMapping(value="/bDelete.do")
+	public ModelAndView boardDelete(@RequestParam(name="board_num") String board_num, HttpServletRequest request, ModelAndView mv) {
+		try {
+			Board b = bService.selectOne(board_num);
+			removeFile(b.getBoard_file(), request);
+			
+			bService.deleteBoard(board_num);
+			
+			mv.setViewName("redirect:bList.do");
+		} catch(Exception e) {
+			mv.addObject("msg", e.getMessage());
+			mv.setViewName("errorPage");
+		}
+		return mv;
+	}
 	
 //	int updateBoard(Board d);
 //	int deleteBoard(String board_num);
