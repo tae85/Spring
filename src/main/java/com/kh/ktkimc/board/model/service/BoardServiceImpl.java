@@ -66,4 +66,10 @@ public class BoardServiceImpl implements BoardService{
 		return bDao.selectList(startPage, limit);
 	}
 
+	@Override
+	public Board selectBoard(int chk, String board_num) {
+		if(chk==0) bDao.addReadCount(board_num);
+		return bDao.selectOne(board_num);
+	}
+
 }

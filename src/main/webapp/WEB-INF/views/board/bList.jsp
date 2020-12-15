@@ -7,13 +7,13 @@
 <meta charset="UTF-8">
 <title>게시판 목록</title>
 <link href="${pageContext.request.contextPath}/resources/css/style.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/jquery3.2.1.min.js"></script> 
+<script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/jquery3.5.1.js"></script> 
 <script type="text/javascript">
 $(function(){
 	$('from[name=listForm]').on('submit', function(e){
 		if($('input[name=keyword]').val()==null || $('input[name=keyword]').val()==""){
 			alert("검색어를 입력해 주세요.");
-			e.preventDefaout();
+			e.preventDefault();
 		} else{
 			return true;
 		}
@@ -71,7 +71,7 @@ $(function(){
 			</c:forEach>
 		</c:if>
 		<!-- 앞 페이지 번호 처리 -->
-		<tr align="center height="20">
+		<tr align="center" height="20">
 			<td colspan="5">
 				<c:if test="${currentPage<=1 }">
 					[이전]&nbsp;

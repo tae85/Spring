@@ -6,19 +6,26 @@
 <head>
 <meta charset="UTF-8">
 <title>게시글 상세 보기</title>
+<link href="${pageContext.request.contextPath}/resources/css/style.css" rel="stylesheet" type="text/css" />
+<script src="${pageContext.request.contextPath}/resources/js/jquery-3.5.1.js"></script>
 </head>
 <body bgcolor="#FFEFD5">
+	<h1 align="center">게시글 상세 보기</h1>
 		<table align="center" cellpadding="10" cellspacing="0" border="1" width="70%"> 
 			<tr align="center" valign="middle"> 
 				<th colspan="2">${board.board_num }번글 상세보기</th>
 			</tr>
 			<tr>
-				<td height="15" width="middle">제목</td>
+				<td height="15" width="middle">제 목</td>
 				<td>${board.board_title }</td>
 			</tr>
 			<tr>
 				<td>작성자</td>
 				<td>${board.board_writer }</td>
+			</tr>
+			<tr>
+				<td>내용</td>
+				<td>${board.board_content }</td>
 			</tr>
 			<tr>
 				<td>첨부파일</td>
@@ -31,29 +38,162 @@
 					</c:if> 
 				</td>
 			</tr>
-			<tr>
-				<td>내용</td>
-				<td>${board.board_content }</td>
-			</tr>
-			<tr>
-				<td colspan="2" align="center">
+			<tr align="center" valign="middel">
+				<td colspan="2">
 				<c:url var="bupview" value="bRenew.do">
 					<c:param name="board_num" value="${board.board_num }"/>
-					<%-- <c:param name="page" value="${currentPage }"/> --%>
+					<c:param name="page" value="${currentPage }"/>
 				</c:url>
 				<c:url var="bdel" value="bDelete.do">
 					<c:param name="board_num" value="${board.board_num }"/>
 				</c:url>
-				<a href="${bupview }">수정하기</a>
+				<a href="${bupview }">[수정 페이지로 이동]</a>
 					&nbsp;&nbsp;
-				<a href="${bdel }">삭제하기</a>
+				<a href="${bdel }">[글 삭제]</a>
 					&nbsp;&nbsp;
 				<c:url var="bList" value="bList.do">
-					<c:param name="page" value="1"/>
+					<c:param name="page" value="${currentPage }"/>
 				</c:url>
-				<a href=${bList }>목록으로</a>
+					<a href=${bList }>목록으로</a>
 				</td>
 			</tr>
 		</table>
+		<br>
+		<h4><span>댓글(${commentList.size()})</span></h4>
+		<c:if test="${!empty commentList }">
+			<c:forEach var="v" items="${commentList }">
+				<div id="comment">
+					<hr>
+					<input type="hidden" id="rep_id" name="rep_id" value="${v.comment_id }">
+					<input type="hidden" id="rep_pwd" name="rep_pwd" value="${v.comment_pwd }">
+					<h4 class="comment-head">작성자 : ${v.comment_name } &nbsp; &nbsp; 작성일 : ${v.regdate }</h4>
+					<div class="comment-body"><p>${v.comments }</p></div>
+					<div class="comment-confirm" style="display: none;">비밀번호 확인 : <input type="password" name="pwd_chk"></div>
+					<p align="right">
+						<button type="button" class="updateConfirm" name="updateConfirm" id="updateConfirm" style="display:none;">수정완료</button>&nbsp;&nbsp;&nbsp;
+						<button type="button" class="delete" name="delete" id="delete" style="display:none;">삭제하기</button>&nbsp;&nbsp;&nbsp;
+						<button type="button" class="update" name="update" id="update">수정 및 삭제</button>
+					</p>
+				</div>
+				<br><br>
+			</c:forEach>
+		</c:if>
+		<hr>
+		<div class="comment-box">
+			<form action="brInsert.do" id="replyForm" method="get">
+				<input type="hidden" id="board_num" name="board_num" value="${board.board_num }">
+				<input type="hidden" id="page" name="page" value="${currentPage}">
+				<input type="hidden" id="comments" name="comments" value="">
+				<p align ="center">
+					작성자 : <input type="text" name="comment_name" size="23">&nbsp;&nbsp;
+					비밀번호 : <input type="password" name="comment_pwd" size="23"><br><br>
+					<textarea id="reply_contents" class="form-control" rows="6" cols="70%" 
+							onfocus="if(this.value=='Message'){this.value='';}" 
+							onblur="if(this.value==''){this.value='Message';}" placeholder="Message"></textarea>
+					<br><br>
+					<input type="submit" value="댓글쓰기">
+				</p>
+			</form>
+		</div>
 </body>
+<script type="text/javascript">
+	$(function(){
+		$('#replyForm').on('submit', function(event){
+			if($('#reply_contents').val()==""){
+				alert("내용을 입력해 주세요.");
+				event.preventDefault();
+			} else{
+				$('#comments').val($('#reply_contents').val());
+				return true;
+			}
+		});
+		
+		$(".update").on('click', function(){
+			var parentP = $(this).parent();
+			var parentDiv = parentP.parent();
+			var commBody = parentDiv.children('.comment-body');
+			var content = commBody.children('p').text().trim();
+			
+			if($(this).text()=="수정 및 삭제"){
+				commBody.append('<textarea style="margin-top:7px;" rows="4" cols="70%" class="updateContent" name="updateContent" id="updateContent">'+content+'</textarea>');
+				parentDiv.children('.comment-confirm').show();
+				parentP.children(".delete").toggle("fast");
+				parentP.children(".updateConfirm").toggle("fast");
+				$(this).text("수정취소");
+			} else {
+				commBody.children(".updateContent").remove();
+				parentDiv.children('.comment-confirm').hide();
+				$(this).text("수정 및 삭제");
+				parentP.children(".delete").toggle("fast");
+				parentP.children(".updateConfirm").toggle("fast");
+			}
+		});
+		
+		$(".updateConfirm").on('click', function(){
+			var parentP = $(this).parent();
+			var parentDiv = parentP.parent();
+			if(parentDiv.find('input[name=pwd_chk]').val() != parentDiv.children('inpupt[name=rep_pwd]').val()){
+				alert("비밀번호가 일치하지 않습니다.");
+				return false;
+			} else{
+				$.ajax({
+					url:"${pageContext.request.contextPath}/brUpdate.do",
+					method:"POST",
+					async:false,
+					data:{
+						comment_id:parentDiv.find("input[name=rep_id]").val(),
+						comment_pwd:parentDiv.find("input[name=pwd_chk]").val(),
+						comments:parentDiv.find('.updateContent').val()
+					},
+					success: function(data){
+						alert(data);
+						parentDiv.find(".comment-body p").text(parentDiv.find('.updateContent').val());
+					},
+					error:function(request, status, error){
+						alert("code : " +request.status + "\n" + "message : " + request.responseText + "\n" + "error : " + error);
+					}
+				});
+			}
+			
+			parentDiv.find(".updateContent").remove();
+			parentDiv.find(".comment-confirm").val("");
+			parentDiv.find(".comment-confirm").hide();
+			parentP.children(".updateConfirm").toggle("fast");
+			parentP.children(".delete").toggle("fast");
+			parentP.children(".update").text("수정 및 삭제");
+		});
+		
+		$(".delete").on('click', function(){
+			var parentP = $(this).parent();
+			var parentDiv = parentP.parent();
+			
+			if(parentDiv.find('input[name=pwd_chk]').val() != parentDiv.children('input[name=rep_pwd]').val()){
+				alert("비밀번호가 일치하지 않습니다.");
+				return false;
+			} else{
+				$.ajax({
+					url:"${pageContext.request.contextPath}/brDelete.do",
+					method:"POST",
+					data:{
+						comment_id:parentDiv.find("input[name=rep_id]").val(),
+						comment_pwd:parentDiv.find("input[name=pwd_chk]").val()
+					},
+					success:function(data){
+						alert(data);
+						parentDiv.remove();
+					},
+					error:function(request, status, error){
+						alert("code : " +request.status + "\n" + "message : " + request.responseText + "\n" + "error : " + error);
+					}
+				});
+			}
+		});
+	});
+</script>
 </html>
+
+
+
+
+
+

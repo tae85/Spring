@@ -5,6 +5,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<link href="${pageContext.request.contextPath}/resources/css/style.css" rel="stylesheet" type="text/css" />
 <script src="${pageContext.request.contextPath}/resources/js/jquery-3.5.1.js"></script>
 <!-- <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> -->
 <title>게시글 수정</title>
@@ -23,7 +24,7 @@
 				<td><input type="text" name="board_writer" value="${board.board_writer }"></td>
 			</tr>
 			<tr>
-				<td>첨부파일</td>
+				<td>이전 첨부파일</td>
 				<!-- 원래 vo에 있는 이름을 사용하게 되면 String 형태 여야함. file 형태로 가져가야 하므로 name을 다르게 지정함. -->
 				<td>
 					<c:if test="${empty board.board_file}">          
@@ -44,11 +45,11 @@
 			</tr>
 			<tr>
 				<td>내용</td>
-				<td><textarea cols="50" rows="7" name="board_content" value="${board.board_content }"></textarea></td>
+				<td><textarea cols="50" rows="7" name="board_content">${board.board_content }</textarea></td>
 			</tr>
 			<tr>
 				<td colspan="2" align="center">
-				<input type="submit" value="수정하기">&nbsp;&nbsp;
+				<input type="submit" id="renew" value="수정하기">&nbsp;&nbsp;
 				<c:url var="bList" value="bList.do">
 					<c:param name="page" value="1"/>
 				</c:url>
@@ -60,7 +61,6 @@
 </body>
 <script type="text/javascript">
 	$(function(){
-		console.log("펑션");
 		$('form[name=renewFrom]').on('submit', function(event){
 			if($('input[name=board_pwd]').val() != "${board.board_pwd}"){
 				alert("비밀번호가 일치하지 않습니다.");

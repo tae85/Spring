@@ -19,7 +19,7 @@
 
 	<select id="selectList" resultType="arraylist"
 		resultMap="resultBoard">
-		select * from board
+		select * from board order by regdate desc
 	</select>
 
 	<insert id="insertBoard" parameterType="string"

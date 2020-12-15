@@ -14,6 +14,7 @@ public interface BoardService {
 	Board updateBoard(Board b);
 	void deleteBoard(String board_num);
 	
-	public List<Board> searchList(String keyword);
-	public List<Board> selectList(int startPage, int limit);
+	List<Board> searchList(String keyword);
+	List<Board> selectList(int startPage, int limit);
+	Board selectBoard(int chk, String board_num);
 }

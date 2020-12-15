@@ -2,6 +2,7 @@ package com.kh.ktkimc.board.model.dao;
 
 import java.util.List;
 
+import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -22,7 +23,9 @@ public class BoardDao {
 		return sqlSession.selectList("Board.selectList");
 	}
 	public List<Board> selectList(int startPage, int limit){
-		return sqlSession.selectList("Board.selectList");
+		int startRow=(startPage-1)*limit;
+		RowBounds row = new RowBounds(startRow, limit);
+		return sqlSession.selectList("Board.selectList", null, row);
 	}
 	
 	public int insertBoard(Board b) {

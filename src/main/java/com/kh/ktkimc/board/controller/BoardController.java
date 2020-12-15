@@ -1,23 +1,20 @@
 package com.kh.ktkimc.board.controller;
 
 import java.io.File;
-import java.util.List;
-import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.kh.ktkimc.board.model.domain.Board;
 import com.kh.ktkimc.board.model.service.BoardReplyService;
 import com.kh.ktkimc.board.model.service.BoardService;
+import com.kh.ktkimc.board.model.domain.Board;
 
 @Controller
 //@RequestMapping(value="/board")	// 연속해서 나오기도 함 밑에 있는 것들과 연결해서 사용 한다.
@@ -38,21 +35,40 @@ public class BoardController {
 	
 
 	@RequestMapping(value="/bInsert.do", method =  RequestMethod.POST)
-	public ModelAndView boardInsert(Board b, @RequestParam(name="upfile") MultipartFile report, HttpServletRequest request, ModelAndView mv) {
-		
-		if(report!=null && !report.equals("")) {
-			saveFile(report, request);
+	public ModelAndView boardInsert(Board b, @RequestParam(name="upfile", required = false) MultipartFile report, HttpServletRequest request, ModelAndView mv) {
+		try {
+			if(report!=null && !report.equals("")) {
+				saveFile(report, request);
+			}
+			b.setBoard_file(report.getOriginalFilename());
+			bService.insertBoard(b);
+			mv.setViewName("redirect:bList.do");
+		} catch(Exception e) {
+			mv.addObject("msg", e.getMessage());
+			mv.setViewName("errorPage");
 		}
-		b.setBoard_file(report.getOriginalFilename());
-		bService.insertBoard(b);
-		mv.setViewName("redirect:bList.do");
 		return mv;
 	}
 	
 	@RequestMapping(value="/bList.do", method = RequestMethod.GET)
-	public ModelAndView boardListService(ModelAndView mv) {
-		mv.addObject("list", bService.selectList());
-		mv.setViewName("board/bList");
+	public ModelAndView boardListService(@RequestParam(name="page", defaultValue = "1") int page, 
+			@RequestParam(name="keyword", required=false) String keyword, ModelAndView mv) {
+		try {
+			int currentPage = page;
+			int listCount=bService.listCount();
+			int maxPage=(int)((double)listCount/LIMIT+0.9);
+			
+			if(keyword!=null&&!keyword.equals(""))
+				mv.addObject("list", bService.searchList(keyword));
+			else mv.addObject("list", bService.selectList(currentPage, LIMIT));
+			mv.addObject("currentPage", currentPage);
+			mv.addObject("maxPage", maxPage);
+			mv.addObject("listCount", listCount);
+			mv.setViewName("board/bList");
+		} catch(Exception e) {
+			mv.addObject("msg", e.getMessage());
+			mv.setViewName("errorPage");
+		}
 		return mv;
 	}
 	
@@ -96,47 +112,65 @@ public class BoardController {
 		}
 	}
 	
-	@RequestMapping(value="/bDetail.do")
+	@RequestMapping(value="/bDetail.do", method = RequestMethod.GET)
 	public ModelAndView boardDetail(@RequestParam(name="board_num") String board_num, 
 			@RequestParam(name="page", defaultValue = "1") int page, ModelAndView mv) {
-		mv.addObject("board", bService.selectOne(board_num));
-		mv.setViewName("board/bDetail");
+		try {
+			int currentPage=page;
+			mv.addObject("board", bService.selectBoard(0, board_num));
+			mv.addObject("commentList", brService.selectList(board_num));
+			mv.addObject("currentPage", currentPage);
+			mv.setViewName("board/bDetail");
+		} catch (Exception e) {
+			mv.addObject("msg", e.getMessage());
+			mv.setViewName("errorPage");
+		}
 		return mv;
 	}
 	
-	@RequestMapping(value="/bRenew.do")
+	@RequestMapping(value="/bRenew.do", method = RequestMethod.GET)
 	public ModelAndView boardDetail(@RequestParam(name="board_num") String board_num, ModelAndView mv) {
-		mv.addObject("board", bService.selectOne(board_num));
-		mv.setViewName("board/bRenew");
+		try {
+			mv.addObject("board", bService.selectBoard(1, board_num));
+			mv.setViewName("board/bRenew");
+		} catch(Exception e) {
+			mv.addObject("msg", e.getMessage());
+			mv.setViewName("errorPage");
+		}
 		return mv;
 	}
 	
 	@RequestMapping(value="/bUpdate.do", method = RequestMethod.POST)
-	public ModelAndView boardUpdate(Board b, @RequestParam(name="upfile") MultipartFile report, HttpServletRequest request, ModelAndView mv) {
-		
-		if(report!=null || !report.equals("")) {
-			removeFile(b.getBoard_file(), request);
-			saveFile(report, request);
-			b.setBoard_file(report.getOriginalFilename());
+	public ModelAndView boardUpdate(Board b, @RequestParam(name="page", defaultValue = "1") int page, 
+			@RequestParam(name="upfile") MultipartFile report, HttpServletRequest request, ModelAndView mv) {
+		try {
+			if(report!=null || !report.equals("")) {
+				removeFile(b.getBoard_file(), request);
+				saveFile(report, request);
+				b.setBoard_file(report.getOriginalFilename());
+			}
+			if(bService.updateBoard(b)!=null) {
+				mv.addObject("board_num", bService.updateBoard(b).getBoard_num());
+				mv.addObject("currentPage", page);
+				mv.setViewName("redirect:bDetail.do");
+			}
+		} catch(Exception e) {
+			mv.addObject("msg", e.getMessage());
+			mv.setViewName("errorPage");
 		}
-		if(bService.updateBoard(b)!=null) {
-			mv.addObject("board_num", bService.updateBoard(b).getBoard_num());
-			mv.setViewName("redirect:bDetail.do");
-		}else {
-			
-		}
-		
 		return mv;
 	}
 	
 	@RequestMapping(value="/bDelete.do")
-	public ModelAndView boardDelete(@RequestParam(name="board_num") String board_num, HttpServletRequest request, ModelAndView mv) {
+	public ModelAndView boardDelete(@RequestParam(name="board_num") String board_num, 
+			@RequestParam(name="page", defaultValue = "1") int page, HttpServletRequest request, ModelAndView mv) {
 		try {
-			Board b = bService.selectOne(board_num);
+			Board b = bService.selectBoard(1, board_num);
 			removeFile(b.getBoard_file(), request);
 			
 			bService.deleteBoard(board_num);
 			
+			mv.addObject("currentPage", page);
 			mv.setViewName("redirect:bList.do");
 		} catch(Exception e) {
 			mv.addObject("msg", e.getMessage());
@@ -145,6 +179,4 @@ public class BoardController {
 		return mv;
 	}
 	
-//	int updateBoard(Board d);
-//	int deleteBoard(String board_num);
 }
