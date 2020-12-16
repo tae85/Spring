@@ -7,10 +7,9 @@
 <meta charset="UTF-8">
 <link href="${pageContext.request.contextPath}/resources/css/style.css" rel="stylesheet" type="text/css" />
 <script src="${pageContext.request.contextPath}/resources/js/jquery-3.5.1.js"></script>
-<!-- <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> -->
 <title>게시글 수정</title>
 </head>
-<body>
+<body bgcolor="#ffefd5">
 	<form name="renewFrom" action="bUpdate.do" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="board_num" value="${board.board_num}">
 		<input type="hidden" name="board_file" value="${board.board_file}">

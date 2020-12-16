@@ -14,6 +14,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.kh.ktkimc.board.model.service.BoardReplyService;
 import com.kh.ktkimc.board.model.service.BoardService;
+import com.kh.ktkimc.test.MyTestComponent;
 import com.kh.ktkimc.board.model.domain.Board;
 
 @Controller
@@ -26,10 +27,14 @@ public class BoardController {
 	@Autowired
 	private BoardReplyService brService;
 	
+	@Autowired
+	private MyTestComponent mytest01;
+	
 	public static final int LIMIT=10;
 	
 	@RequestMapping(value="/writeForm.do", method = RequestMethod.GET)
 	public String boardInsertForm(ModelAndView mv) {
+		mytest01.testFunc();
 		return "board/writeForm";
 	}
 	
@@ -144,13 +149,14 @@ public class BoardController {
 	public ModelAndView boardUpdate(Board b, @RequestParam(name="page", defaultValue = "1") int page, 
 			@RequestParam(name="upfile") MultipartFile report, HttpServletRequest request, ModelAndView mv) {
 		try {
-			if(report!=null || !report.equals("")) {
+			if(report!=null && !report.equals("")) {
 				removeFile(b.getBoard_file(), request);
 				saveFile(report, request);
 				b.setBoard_file(report.getOriginalFilename());
 			}
 			if(bService.updateBoard(b)!=null) {
 				mv.addObject("board_num", bService.updateBoard(b).getBoard_num());
+//				mv.addObject("board_num", b.getBoard_num());	// 선생님 추천 코드
 				mv.addObject("currentPage", page);
 				mv.setViewName("redirect:bDetail.do");
 			}

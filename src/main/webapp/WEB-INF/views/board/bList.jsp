@@ -7,10 +7,10 @@
 <meta charset="UTF-8">
 <title>게시판 목록</title>
 <link href="${pageContext.request.contextPath}/resources/css/style.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="${pageContext.request.contextPath}/resources/js/jquery3.5.1.js"></script> 
+<script src="${pageContext.request.contextPath}/resources/js/jquery-3.5.1.js"></script> 
 <script type="text/javascript">
 $(function(){
-	$('from[name=listForm]').on('submit', function(e){
+	$('form[name=listForm]').on('submit', function(e){
 		if($('input[name=keyword]').val()==null || $('input[name=keyword]').val()==""){
 			alert("검색어를 입력해 주세요.");
 			e.preventDefault();

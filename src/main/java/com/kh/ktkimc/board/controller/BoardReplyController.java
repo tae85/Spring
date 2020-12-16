@@ -46,6 +46,7 @@ public class BoardReplyController {
 		JSONObject job = new JSONObject();
 		try {
 			job.put("ack", brService.updateBoardReply(br));
+			System.out.println("br : " + brService.updateBoardReply(br));
 			out = response.getWriter();
 			out.append(job.toJSONString());
 		} catch(Exception e) {

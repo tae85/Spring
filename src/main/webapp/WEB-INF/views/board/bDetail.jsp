@@ -132,7 +132,7 @@
 		$(".updateConfirm").on('click', function(){
 			var parentP = $(this).parent();
 			var parentDiv = parentP.parent();
-			if(parentDiv.find('input[name=pwd_chk]').val() != parentDiv.children('inpupt[name=rep_pwd]').val()){
+			if(parentDiv.find('input[name=pwd_chk]').val() != parentDiv.children('input[name=rep_pwd]').val()){
 				alert("비밀번호가 일치하지 않습니다.");
 				return false;
 			} else{
